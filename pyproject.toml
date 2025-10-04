@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "labbox"
+version = "0.1.0"
+description = "LabBox is a PyQt-based tool for play&learn and monitoring microcontroller activity"
+readme = "README.md"
+license = { file = "LICENSE.txt" }
+authors = [{ name = "SWAG Engineering" }]
+requires-python = ">=3.10,<3.14"
+
+dependencies = [
+  "pyqtgraph>=0.13.7,<0.14",
+  "numpy>=2.1,<2.4",
+  "PyQt5>=5.15.10,<5.16",
+  "pyserial>=3.5,<4"
+]
+
+[project.scripts]
+labbox = "labbox.__main__:main"
+labbox-generator = "labbox.generator:main"
+
+[project.urls]
+Homepage = "https://github.com/swag-engineering/labbox"
+
+[tool.setuptools.packages.find]
+include = ["labbox*"]
+
+[tool.setuptools.package-data]
+labbox = [
+  "gifs/*.gif",
+  "icons/*.png",
+  "settings/*.json",
+  "ui/*.ui",
+  "ui/*.py"
+]

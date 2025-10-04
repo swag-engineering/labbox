@@ -1,4 +1,4 @@
-pyqtgraph==0.11.0
-numpy==1.19.0
-PyQt5==5.10.1
-pyserial==3.4
+pyqtgraph>=0.13.7,<0.14
+numpy>=2.1,<2.4
+PyQt5==5.15.10,<5.16
+pyserial>=3.5,<4
