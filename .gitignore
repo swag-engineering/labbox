@@ -3,7 +3,6 @@ __pycache__
 venv
 .idea
 /stm32_example/
-/docs/
 /build/
 /dist/
 *.egg-info
