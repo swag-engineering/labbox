@@ -1,0 +1,41 @@
+{
+    "Config": {
+        "defaultDataLength": "0xFFFF",
+        "lastMaxVoltage": 5000,
+        "lastMinVoltage": 0,
+        "lastUpdateTime": 10,
+        "maxVoltageTip": "Absolute maximum value that will be visible on y-axis.",
+        "minVoltageTip": "Show negative offset of y-axis.",
+        "numericRegex": "\\d{5}",
+        "signalNameTip": "Name that you will see in plot's legend.\nOne of the signals should be named 'ADC' to observe its real time value.\nOrder is important!\nPreferred length: 10 characters.",
+        "signalsNumberTip": "The number of signals that you want to observe on the plot.",
+        "textRegex": "[a-zA-Z0-9_]{10}",
+        "updateTimeTip": "Interval between reading input data packets. Also used to update plot's view.\nShould be less or equal to interval that used on a micro controller to send data!\nPreferred value: from 1 to 99."
+    },
+    "LabBox": {
+        "cfgButtonTip": "Create config data array.",
+        "csvPathLineEditTip": "Path to directory where CSV's will be saved.\n Optional, leave empty for no log.",
+        "defaultPointsNumber": 1000,
+        "lastBaudrate": "115200",
+        "lastDevicePath": "",
+        "lineColors": [
+            "b",
+            "g",
+            "r",
+            "k"
+        ],
+        "pointsNumberLineEditRegex": "^[1-9]\\d*",
+        "supportedBaudRates": [
+            1200,
+            2400,
+            4800,
+            9600,
+            19200,
+            38400,
+            57600,
+            115200
+        ],
+        "valueLineEditRegex": "^([0-9]|[1-8][0-9]|9[0-9]|[1-8][0-9]{2}|9[0-8][0-9]|99[0-9]|[1-8][0-9]{3}|9[0-8][0-9]{2}|99[0-8][0-9]|999[0-9]|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
+    },
+    "defaultStyle": "windows"
+}

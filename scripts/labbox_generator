@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+
+import os
+# os.chdir(os.path.dirname(os.getcwd()))	# make all paths relative to package labbox
+# print(os.getcwd())
+import logging
+import math
+import argparse
+import pty
+from time import sleep
+
+from labbox.defines import Cmd
+
+
+def validate_input(signals_args, frequency_args):
+	valid_signals = ("sin", "sqr", "tri", "saw")
+	if len(signals_args) > len(valid_signals):
+		parser.error(f"Number of signals > max: {len(valid_signals)}.")
+	elif len(frequency_args) != len(signals_args):
+		parser.error(
+			f"Frequency args: {len(frequency_args)} != signal args: {len(signals_args)}. "
+		)
+	for s in signals_args:
+		if s not in valid_signals:
+			raise argparse.ArgumentParser.error(
+				parser, f"Unsupported signal name: {s}."
+			)
+	for f in frequency_args:
+		if int(f) > 10 or int(f) < 1:
+			raise argparse.ArgumentParser.error(
+				parser, f"Signal's frequency should be in range [1, 10]."
+			)
+
+
+
+def sqr_func(freq, time, min_val, max_val):
+	p = 1 / freq
+	time_reminder = time % p
+	value = int(max_val if time_reminder > p/2 else min_val)
+	return value.to_bytes(2, signed=True, byteorder="little")
+
+
+def tri_func(freq, time, min_val, max_val):
+	p = 1 / freq
+	time_reminder = time % p
+	if time_reminder <= p/2:
+		value = int((2 * (max_val-min_val) * time_reminder) / p) - max_val
+	else:
+		value = int((2 * (max_val-min_val) * (p - time_reminder)) / p) - max_val
+	return value.to_bytes(2, signed=True, byteorder="little")
+
+
+def saw_func(freq, time, min_val, max_val):
+	p = 1 / freq
+	time_reminder = time % p
+	value = int(((max_val - min_val) * time_reminder) / p) - max_val
+	return value.to_bytes(2, byteorder="little", signed=True)
+
+
+def sin_func(freq, time, min_val, max_val):
+	value = int(math.sin(2 * math.pi * freq * time) / 2 * (max_val - min_val))
+	return value.to_bytes(2, byteorder="little", signed=True)
+
+
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser(
+		description="Signals wave generator. Emulates USB serial port.",
+		epilog=(
+			"Example of use:\n generate a sinus wave at baudrate 115200:\n"
+			" ./generator.py -b 115200"
+		),
+	)
+	parser.add_argument(
+		"-b",
+		"--baudrate",
+		help="Baudrate that will be used to send data.",
+		choices=[1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200],
+		required=True,
+		type=int,
+		dest="baudrate",
+	)
+	parser.add_argument(
+		"-f",
+		"--frequency",
+		help="Frequency of a signal (signals). Should be an integer in range [1, 10]. " + \
+			"Amount should be equal to the number of signals. If more than one signal is used, " + \
+			"frequencies should be separated with ';', like \"3;4;5\".",
+		type=str,
+		default="1",
+		dest="frequency",
+	)
+	parser.add_argument(
+		"-s",
+		"--signal",
+		help="Signal (or signals) that will be sent. Possible options: sin, sqr, tri, saw.",
+		type=str,
+		default="sin",
+		dest="signals",
+	)
+
+	args = parser.parse_args()
+	time = 0
+	inc_time = 0.01
+	max_val = 3000
+	min_val = -3000
+
+	signals = args.signals.split(";")
+	frequencies = args.frequency.split(";")
+
+	validate_input(signals, frequencies)
+	logging.basicConfig(
+		level="INFO", format=f"%(asctime)s - [%(levelname)s] %(message)s"
+	)
+
+	master, slave = pty.openpty()
+	logging.info("File for communication: " + os.ttyname(slave))
+	logging.info(f"{signals}, {frequencies}")
+
+	while True:
+		cmd = int.from_bytes(os.read(master, 4), byteorder="little")
+		if cmd == Cmd.PC_HELLO:
+			array = Cmd.CFG_START.to_bytes(4, byteorder="little")
+			# add number of signals
+			array += len(signals).to_bytes(1, byteorder="little")
+			# add max value
+			array += max_val.to_bytes(2, byteorder="little")
+			# add min value
+			array += min_val.to_bytes(2, signed=True, byteorder="little")
+			# add update time in ms
+			array += int(inc_time * 1000).to_bytes(1, byteorder="little")
+
+			# add len and values of signal names:
+			for signal in signals:
+				array += len(signal).to_bytes(1, byteorder="little")
+				for char in signal:
+					array += ord(char).to_bytes(1, byteorder="little")
+			os.write(master, array)
+			break
+
+	while True:
+		array = Cmd.DATA_START.to_bytes(4, byteorder="little")
+		for signal, frequency in [(s, int(f)) for s, f in zip(signals, frequencies)]:
+			if signal == "sin":
+				array += sin_func(frequency, time, min_val, max_val)
+			elif signal == "sqr":
+				array += sqr_func(frequency, time, min_val, max_val)
+			elif signal == "saw":
+				array += saw_func(frequency, time, min_val, max_val)
+			elif signal == "tri":
+				array += tri_func(frequency, time, min_val, max_val)
+		time += inc_time
+		os.write(master, array)
+		sleep(inc_time)
+

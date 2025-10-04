@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+venv
+.idea
+/stm32_example/
+/docs/
+/build/
+/dist/
+*.egg-info
+/labbox/settings/settings.json

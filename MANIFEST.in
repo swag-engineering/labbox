@@ -1,0 +1,2 @@
+include labbox/settings/settings.json
+include labbox/icons/*
