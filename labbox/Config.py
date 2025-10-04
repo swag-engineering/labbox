@@ -27,7 +27,7 @@ class Config(QDialog, Ui_Config):
         self.signalNameLineEdit.textEdited.connect(
             lambda: self.onLineEdit(self.signalNameLineEdit)
         )
-        defaultDataLength = int(Settings.byObject(self).defaultDataLength, 16) / 2
+        defaultDataLength = int(Settings.byObject(self).defaultDataLength, 16) // 2
         self.minVoltageSpinBox.setMinimum(defaultDataLength * -1)
         self.minVoltageSpinBox.setMaximum(0)
         self.minVoltageSpinBox.setSingleStep(100)

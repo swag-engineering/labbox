@@ -2,10 +2,8 @@ from .defines import *
 from .Config import Config
 from .ui.Ui_LabBox import Ui_LabBox
 from .Settings import Settings
-from .GIFHandler import GIFHandler
 
 import os
-import sys
 import serial
 import numpy as np
 from collections import deque
@@ -13,7 +11,7 @@ from itertools import islice
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMainWindow
 from PyQt5.QtCore import QRegExp, QTimer, Qt
-from PyQt5.QtGui import QMovie, QRegExpValidator, QColor, QIcon, QPixmap
+from PyQt5.QtGui import QRegExpValidator, QColor, QIcon, QPixmap
 
 
 
@@ -114,11 +112,6 @@ class LabBox(QMainWindow, Ui_LabBox):
 		self.plotView.setBackground(QColor(0xEF, 0xEF, 0xEF))
 		self.plotView.plot.setContentsMargins(10, 0, 10, 0)
 		self.plotView.plot.setXRange(0, self.pointsNumber, padding=0)
-
-		# enable blinking animation
-		# self.beemoLabel.startMain(QMovie("img/staying.gif", parent=self.beemoLabel))
-		# self.beemoLabel.setPeriodically(QMovie("img/blinking.gif", parent=self.beemoLabel), 2000)
-
 	def sendLineEditValue(self):
 		if self.microConnected:
 			self.write(Cmd.PLAYGROUND, Playground.LINE_EDIT, 
@@ -218,8 +211,6 @@ class LabBox(QMainWindow, Ui_LabBox):
 				self.csvPathLineEdit.setEnabled(False)
 				self.initPlot()
 				self.initPlayground()
-				# enable jumping animation
-				# self.beemoLabel.playOnce(QMovie("img/jumping.gif"), priority=True)
 			except (ValueError, FileNotFoundError, PermissionError, RuntimeError) as e:
 				QMessageBox.warning(
 					self, "Error", str(e), QMessageBox.Ok
